@@ -1,0 +1,17 @@
+theano
+pyyaml
+six
+
+[h5py]
+h5py
+
+[tests]
+pytest
+pytest-cov
+pytest-pep8
+pytest-xdist
+python-coveralls
+coverage==3.7.1
+
+[visualize]
+pydot-ng

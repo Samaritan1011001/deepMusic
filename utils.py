@@ -283,7 +283,7 @@ class FfmpegLoader(RawAudioLoader):
         # 30s at 44.1 kHz ~= 1.3e6
         proc = sp.run(command, stdout=sp.PIPE, bufsize=10**7, stderr=sp.DEVNULL, check=True)
 
-        return np.fromstring(proc.stdout, dtype="int16")
+        return np.fromstring(proc.stdout, dtype="int16"), self.sampling_rate
 
 
 def build_sample_loader(audio_dir, Y, loader):
@@ -326,6 +326,7 @@ def build_sample_loader(audio_dir, Y, loader):
                 # print('queue', self.tids[batch_current], batch_size)
                 tids = np.array(self.tids[batch_current:batch_current+batch_size])
 
+            print(tids)
             for i, tid in enumerate(tids):
                 self.X[i] = self.loader.load(get_audio_path(audio_dir, tid))
                 self.Y[i] = Y.loc[tid]

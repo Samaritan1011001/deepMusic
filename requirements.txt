@@ -4,8 +4,7 @@ matplotlib
 seaborn
 
 scikit-learn
-#tensorflow
-tensorflow-gpu
+tensorflow
 keras<2
 
 librosa
