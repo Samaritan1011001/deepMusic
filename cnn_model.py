@@ -20,7 +20,7 @@ def main():
     AUDIO_DIR = os.environ.get('AUDIO_DIR')
 
     # Read data
-    tracks = pd.read_csv('fma_metadata/subset_small.csv', index_col=0)
+    tracks = pd.read_csv('D:/Masters/CS577/Project/deepMusic-master/fma_small//fma_metadata//subset_small.csv', index_col=0)
     print(tracks['set_split'].shape)
     train = tracks.loc[tracks['set_split'] == 'training']
     val = tracks.loc[tracks['set_split'] == 'validation']
@@ -71,11 +71,12 @@ def main():
     model.add(layers.Flatten())
     model.add(layers.Dense(128, activation='relu'))
     model.add(layers.Dense(64, activation='relu'))
+    model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dense(8, activation='softmax'))
     model.summary()
 
-    # optimizer = optimizers.SGD(lr=0.1, momentum=0.9, nesterov=True)
-    optimizer = optimizers.Adam(lr=0.01)
+    optimizer = optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True)
+    #optimizer = optimizers.Adam(lr=0.001)
     model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
     # # Train and Validate
@@ -91,7 +92,7 @@ def main():
     # METHOD 2 - DATAGENERATOR
     # Parameters
     params = {'dim': (13, 9),
-              'batch_size': 10,
+              'batch_size': 512,
               'n_classes': 8,
               'n_channels': 1,
               'shuffle': True}
