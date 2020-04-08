@@ -1,6 +1,9 @@
+from python_speech_features import logfbank, mfcc
+
 import utils
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 def plot_signals(signals):
@@ -62,7 +65,7 @@ def plot_mfccs(mfccs):
 def main():
     # AUDIO_DIR = os.environ.get('AUDIO_DIR')
     project_root = "/home/manojnb/deepMusic/"
-    tracks = utils.load(project_root + 'tracks.csv')
+    tracks = utils.load(project_root + 'fma_metadata/tracks.csv')
 
     subset = tracks.index[tracks['set', 'subset'] == 'small']
 
@@ -102,61 +105,61 @@ def main():
     all_tracks.reset_index(inplace=True)
 
 
-    # def calc_fft(y, rate):
-    #     n = len(y)
-    #     freq = np.fft.rfftfreq(n, d=1 / rate)
-    #     Y = abs(np.fft.rfft(y) / n)
-    #     return (Y, freq)
+    def calc_fft(y, rate):
+        n = len(y)
+        freq = np.fft.rfftfreq(n, d=1 / rate)
+        Y = abs(np.fft.rfft(y) / n)
+        return (Y, freq)
+
+    def envelope(y, rate, threshold):
+        mask = []
+        y = pd.Series(y).apply(np.abs)
+        y_mean = y.rolling(window=int(rate / 10), min_periods=1, center=True).mean()
+        for mean in y_mean:
+            if mean > threshold:
+                mask.append(True)
+            else:
+                mask.append(False)
+        return mask
     #
-    # def envelope(y, rate, threshold):
-    #     mask = []
-    #     y = pd.Series(y).apply(np.abs)
-    #     y_mean = y.rolling(window=int(rate / 10), min_periods=1, center=True).mean()
-    #     for mean in y_mean:
-    #         if mean > threshold:
-    #             mask.append(True)
-    #         else:
-    #             mask.append(False)
-    #     return mask
+    # Directory where mp3 are stored.
+    AUDIO_DIR = project_root + "fma_small"
+    print(AUDIO_DIR)
+
+    signals = {}
+    fft = {}
+    fbank = {}
+    mfccs = {}
     #
-    # # Directory where mp3 are stored.
-    # AUDIO_DIR = os.environ.get('AUDIO_DIR')
-    # print(AUDIO_DIR)
+    for c in classes:
+        mp3_file = all_tracks[all_tracks.track_genre_top == c].iloc[0, 0]
+        signal, rate = utils.FfmpegLoader().load(utils.get_audio_path(AUDIO_DIR, mp3_file))
+        #     mask = envelope(signal, rate,0.5)
+        #     signal = signal[mask]
+        signals[c] = signal
+        fft[c] = calc_fft(signal, rate)
+
+        bank = logfbank(signal[:rate], rate, nfilt=26, nfft=1103).T
+        fbank[c] = bank
+        mel = mfcc(signal[:rate], rate, numcep=13, nfilt=26, nfft=1103).T
+        mfccs[c] = mel
+
+    print("Successful")
     #
-    # signals = {}
-    # fft = {}
-    # fbank = {}
-    # mfccs = {}
-    #
-    # for c in classes:
-    #     mp3_file = all_tracks[all_tracks.track_genre_top == c].iloc[0, 0]
-    #     signal, rate = utils.FfmpegLoader().load(utils.get_audio_path(AUDIO_DIR, mp3_file))
-    #     #     mask = envelope(signal, rate,0.5)
-    #     #     signal = signal[mask]
-    #     signals[c] = signal
-    #     fft[c] = calc_fft(signal, rate)
-    #
-    #     bank = logfbank(signal[:rate], rate, nfilt=26, nfft=1103).T
-    #     fbank[c] = bank
-    #     mel = mfcc(signal[:rate], rate, numcep=13, nfilt=26, nfft=1103).T
-    #     mfccs[c] = mel
-    #
-    # print(rate)
-    #
-    # plot_signals(signals)
-    # plt.savefig(project_root + "graphs/signals.png")
+    plot_signals(signals)
+    plt.savefig(project_root + "graphs/signals.png")
     # plt.show()
-    #
-    # plot_fft(fft)
-    # plt.savefig(project_root + "graphs/fft.png")
+
+    plot_fft(fft)
+    plt.savefig(project_root + "graphs/fft.png")
     # plt.show()
-    #
-    # plot_fbank(fbank)
-    # plt.savefig(project_root + "graphs/fbank.png")
+
+    plot_fbank(fbank)
+    plt.savefig(project_root + "graphs/fbank.png")
     # plt.show()
-    #
-    # plot_mfccs(mfccs)
-    # plt.savefig(project_root + "graphs/mfcc.png")
+
+    plot_mfccs(mfccs)
+    plt.savefig(project_root + "graphs/mfcc.png")
     # plt.show()
 
 if __name__ == '__main__':

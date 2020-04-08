@@ -17,14 +17,15 @@ sess = tf.compat.v1.Session(config=config)
 # print(keras.__version__)
 
 def main():
-    AUDIO_DIR = os.environ.get('AUDIO_DIR')
+    # AUDIO_DIR = os.environ.get('AUDIO_DIR')
+    project_root = "/home/manojnb/deepMusic/"
 
     # Read data
-    tracks = pd.read_csv('D:/Masters/CS577/Project/deepMusic-master/fma_small//fma_metadata//subset_small.csv', index_col=0)
+    tracks = pd.read_csv(project_root + 'fma_metadata/subset_small.csv', index_col=0)
     print(tracks['set_split'].shape)
     train = tracks.loc[tracks['set_split'] == 'training']
     val = tracks.loc[tracks['set_split'] == 'validation']
-    test = tracks.index[tracks['set_split'] == 'test']
+    test = tracks.loc[tracks['set_split'] == 'test']
     print(f'train -> {train.columns}')
 
     # Check which genres are present
@@ -44,6 +45,7 @@ def main():
     # For local training purposes
     train = train.head(100)
     val = val.head(100)
+    test = test.head(100)
     print(f'train.index.values -> {len(val.index.values)}')
 
     # Input shape is this because 13->numcep in mfcc function and 9 -> number of frames considered
@@ -71,12 +73,11 @@ def main():
     model.add(layers.Flatten())
     model.add(layers.Dense(128, activation='relu'))
     model.add(layers.Dense(64, activation='relu'))
-    model.add(layers.Dense(64, activation='relu'))
     model.add(layers.Dense(8, activation='softmax'))
     model.summary()
 
-    optimizer = optimizers.SGD(lr=0.01, momentum=0.9, nesterov=True)
-    #optimizer = optimizers.Adam(lr=0.001)
+    # optimizer = optimizers.SGD(lr=0.1, momentum=0.9, nesterov=True)
+    optimizer = optimizers.Adam(lr=0.01)
     model.compile(optimizer, loss='categorical_crossentropy', metrics=['accuracy'])
 
     # # Train and Validate
@@ -90,28 +91,32 @@ def main():
     # print(history)
 
     # METHOD 2 - DATAGENERATOR
+
+    bs = 10
     # Parameters
     params = {'dim': (13, 9),
-              'batch_size': 512,
+              'batch_size': bs,
               'n_classes': 8,
               'n_channels': 1,
               'shuffle': True}
 
     # Generators
-    training_generator = DataGenerator(train.index.values, labels_onehot,ff_loader, **params)
-    validation_generator = DataGenerator(val.index.values, labels_onehot,ff_loader, **params)
+    training_generator = DataGenerator(train.index.values, labels_onehot, ff_loader,project_root+"fma_small", **params)
+    validation_generator = DataGenerator(val.index.values, labels_onehot,ff_loader,project_root+"fma_small", **params)
 
     # Train model on dataset
     model.fit_generator(generator=training_generator,
                         validation_data=validation_generator,
                         use_multiprocessing=True,
                         workers=1)
+    history = model.evaluate_generator(DataGenerator(test.index.values, labels_onehot, ff_loader,project_root+"fma_small", **params), len(test.index.values) // bs)
+    print(f'Final test result -> {history}')
 
 
 class DataGenerator(tf.keras.utils.Sequence):
     'Generates data for Keras'
 
-    def __init__(self, list_IDs, labels, loader, batch_size=32, dim=(32, 32, 32), n_channels=1,
+    def __init__(self, list_IDs, labels, loader,audio_dir, batch_size=32, dim=(32, 32, 32), n_channels=1,
                  n_classes=10, shuffle=True):
         'Initialization'
         self.dim = dim
@@ -123,6 +128,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         self.shuffle = shuffle
         self.on_epoch_end()
         self.loader = loader
+        self.audio_dir = audio_dir
 
     def __len__(self):
         'Denotes the number of batches per epoch'
@@ -156,7 +162,7 @@ class DataGenerator(tf.keras.utils.Sequence):
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
             # Store sample
-            signal, rate = self.loader.load(utils.get_audio_path(os.environ.get('AUDIO_DIR'), ID))
+            signal, rate = self.loader.load(utils.get_audio_path(self.audio_dir, ID))
             ran_index = np.random.randint(0, signal.shape[0] - int(rate / 10))
             sample = signal[ran_index:ran_index + int(rate / 10)]
             # print(f'shape of sample -> {sample.shape}')
