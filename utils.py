@@ -181,46 +181,6 @@ class Genres:
         return roots
 
 
-# def load(filepath):
-#
-#     filename = os.path.basename(filepath)
-#
-#     if 'features' in filename:
-#         return pd.read_csv(filepath, index_col=0, header=[0, 1, 2])
-#
-#     if 'echonest' in filename:
-#         return pd.read_csv(filepath, index_col=0, header=[0, 1, 2])
-#
-#     if 'genres' in filename:
-#         return pd.read_csv(filepath, index_col=0)
-#
-#     if 'tracks' in filename:
-#         tracks = pd.read_csv(filepath, index_col=0, header=[0, 1])
-#
-#         COLUMNS = [('track', 'tags'), ('album', 'tags'), ('artist', 'tags'),
-#                    ('track', 'genres'), ('track', 'genres_all')]
-#         for column in COLUMNS:
-#             tracks[column] = tracks[column].map(ast.literal_eval)
-#
-#         COLUMNS = [('track', 'date_created'), ('track', 'date_recorded'),
-#                    ('album', 'date_created'), ('album', 'date_released'),
-#                    ('artist', 'date_created'), ('artist', 'active_year_begin'),
-#                    ('artist', 'active_year_end')]
-#         for column in COLUMNS:
-#             tracks[column] = pd.to_datetime(tracks[column])
-#
-#         SUBSETS = ('small', 'medium', 'large')
-#         tracks['set', 'subset'] = tracks['set', 'subset'].astype(
-#                  CategoricalDtype(categories=SUBSETS, ordered=True))
-#
-#         COLUMNS = [('track', 'genre_top'), ('track', 'license'),
-#                    ('album', 'type'), ('album', 'information'),
-#                    ('artist', 'bio')]
-#         for column in COLUMNS:
-#             tracks[column] = tracks[column].astype('category')
-#
-#         return tracks
-
 def load(filepath):
 
     filename = os.path.basename(filepath)
@@ -234,32 +194,72 @@ def load(filepath):
     if 'genres' in filename:
         return pd.read_csv(filepath, index_col=0)
 
-    if 'subset_small' in filename:
+    if 'tracks' in filename:
         tracks = pd.read_csv(filepath, index_col=0, header=[0, 1])
 
-        # COLUMNS = [('track_tags'), ('album_tags'), ('artist_tags'),
-        #            ('track_genres'), ('track_genres_all')]
-        # for column in COLUMNS:
-        #     tracks[column] = tracks[column].map(ast.literal_eval)
+        COLUMNS = [('track', 'tags'), ('album', 'tags'), ('artist', 'tags'),
+                   ('track', 'genres'), ('track', 'genres_all')]
+        for column in COLUMNS:
+            tracks[column] = tracks[column].map(ast.literal_eval)
 
-        COLUMNS = [('track_date_created'), ('track_date_recorded'),
-                   ('album_date_created'), ('album_date_released'),
-                   ('artist_date_created'), ('artist_active_year_begin'),
-                   ('artist_active_year_end')]
+        COLUMNS = [('track', 'date_created'), ('track', 'date_recorded'),
+                   ('album', 'date_created'), ('album', 'date_released'),
+                   ('artist', 'date_created'), ('artist', 'active_year_begin'),
+                   ('artist', 'active_year_end')]
         for column in COLUMNS:
             tracks[column] = pd.to_datetime(tracks[column])
 
-        SUBSETS = ('small_medium_large')
-        tracks['set_subset'] = tracks['set_subset'].astype(
+        SUBSETS = ('small', 'medium', 'large')
+        tracks['set', 'subset'] = tracks['set', 'subset'].astype(
                  CategoricalDtype(categories=SUBSETS, ordered=True))
 
-        COLUMNS = [('track_genre_top'), ('track_license'),
-                   ('album_type'), ('album_information'),
-                   ('artist_bio')]
+        COLUMNS = [('track', 'genre_top'), ('track', 'license'),
+                   ('album', 'type'), ('album', 'information'),
+                   ('artist', 'bio')]
         for column in COLUMNS:
             tracks[column] = tracks[column].astype('category')
 
         return tracks
+
+# def load(filepath):
+#
+#     filename = os.path.basename(filepath)
+#
+#     if 'features' in filename:
+#         return pd.read_csv(filepath, index_col=0, header=[0, 1, 2])
+#
+#     if 'echonest' in filename:
+#         return pd.read_csv(filepath, index_col=0, header=[0, 1, 2])
+#
+#     if 'genres' in filename:
+#         return pd.read_csv(filepath, index_col=0)
+#
+#     if 'subset_small' in filename:
+#         tracks = pd.read_csv(filepath, index_col=0, header=[0, 1])
+#
+#         # COLUMNS = [('track_tags'), ('album_tags'), ('artist_tags'),
+#         #            ('track_genres'), ('track_genres_all')]
+#         # for column in COLUMNS:
+#         #     tracks[column] = tracks[column].map(ast.literal_eval)
+#
+#         COLUMNS = [('track_date_created'), ('track_date_recorded'),
+#                    ('album_date_created'), ('album_date_released'),
+#                    ('artist_date_created'), ('artist_active_year_begin'),
+#                    ('artist_active_year_end')]
+#         for column in COLUMNS:
+#             tracks[column] = pd.to_datetime(tracks[column])
+#
+#         SUBSETS = ('small_medium_large')
+#         tracks['set_subset'] = tracks['set_subset'].astype(
+#                  CategoricalDtype(categories=SUBSETS, ordered=True))
+#
+#         COLUMNS = [('track_genre_top'), ('track_license'),
+#                    ('album_type'), ('album_information'),
+#                    ('artist_bio')]
+#         for column in COLUMNS:
+#             tracks[column] = tracks[column].astype('category')
+#
+#         return tracks
 
 
 def get_audio_path(audio_dir, track_id):
