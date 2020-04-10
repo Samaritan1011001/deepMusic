@@ -181,7 +181,6 @@ class Genres:
         return roots
 
 
-<<<<<<< HEAD
 def load(filepath):
     filename = os.path.basename(filepath)
     
@@ -222,8 +221,6 @@ def load(filepath):
         return tracks
 
 """
-=======
->>>>>>> 0942b7cdd3a87359ae8b3313aacaf6e3e48ccaf0
 def load(filepath):
 
     filename = os.path.basename(filepath)
