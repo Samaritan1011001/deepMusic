@@ -64,11 +64,11 @@ def plot_mel_spect(loader,audio_dir,ID):
     plt.title('Test Melspectogram')
     plt.show()
 
-root_folder = "/home/manojnb/deepMusic/"
-AUDIO_DIR = root_folder + 'fma_small'
+# root_folder = "/home/manojnb/deepMusic/"
+# AUDIO_DIR = root_folder + 'fma_small'
 
-# root_folder = "D:\Code\Desktop\IIT\Courses\Spring 2020\Deep Learning\FInal Project\github_project\music_analysis_fp\\"
-# AUDIO_DIR = os.environ.get('AUDIO_DIR')
+root_folder = "D:\Code\Desktop\IIT\Courses\Spring 2020\Deep Learning\FInal Project\github_project\music_analysis_fp\\"
+AUDIO_DIR = os.environ.get('AUDIO_DIR')
 
 
 # Read data
