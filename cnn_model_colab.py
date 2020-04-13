@@ -517,6 +517,7 @@ def plot_epocs_graph(history_dict):
 # input_shape = (1,96,1366)
 # model = getMdeff_model(input_shape)
 
+keras.backend.clear_session()
 # Another trial CRNN
 model = models.Sequential()
 model.add(MusicTaggerCRNN(weights='msd'))
@@ -538,7 +539,9 @@ test_generator = DataGenerator(test.index.values, labels_onehot,ff_loader,AUDIO_
 train_val_history = model.fit_generator(generator=training_generator,
                     validation_data=validation_generator,
                     epochs=5,
+                    use_multiprocessing=True, workers=1,
                     # steps_per_epoch = 20,
+
                     )
 history_dict = train_val_history.history
 plot_epocs_graph(history_dict=history_dict)
