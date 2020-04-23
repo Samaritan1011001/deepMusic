@@ -1,0 +1,39 @@
+LOG 1    
+------------------------------------------------------------------------------------------------------------------------------------------
+    # Conv block 1
+    x = layers.Convolution2D(16,(2, 2), border_mode='same', name='conv1', trainable=True)(melgram_input)
+    x = layers.BatchNormalization(axis=channel_axis, mode=0, name='bn1', trainable=True)(x)
+    x = layers.ELU()(x)
+    x = layers.MaxPooling2D(pool_size=(4, 4), strides=(4, 4), name='pool1')(x)
+    x = layers.Dropout(0.1, name='dropout1', trainable=True)(x)
+
+    # Conv block 2
+    x = layers.Convolution2D(32,(3, 3), border_mode='same', name='conv2', trainable=True)(x)
+    x = layers.BatchNormalization(axis=channel_axis, mode=0, name='bn2', trainable=True)(x)
+    x = layers.ELU()(x)
+    x = layers.MaxPooling2D(pool_size=(2, 2), strides=(2, 2), name='pool2')(x)
+    x = layers.Dropout(0.1, name='dropout2', trainable=True)(x)
+
+	x = layers.Permute((3, 1, 2))(x)
+    shape = x.get_shape().as_list()
+    x = layers.Reshape((shape[1]*shape[-1],shape[2]))(x)
+
+    # GRU block 1, 2, output
+    x = layers.GRU(16, return_sequences=False, name='gru2')(x)
+    x = layers.Dropout(0.3, name='final_drop')(x)
+
+    x = layers.Dense(128, activation='relu', name='hidden1')(x)
+    x = layers.Dense(4, activation='softmax', name='output')(x)
+
+Accuracy -> improves 30~%
+
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+LOG 2
+------------------------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+

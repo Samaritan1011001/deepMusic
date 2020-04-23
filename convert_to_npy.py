@@ -33,8 +33,8 @@ def _get_available_gpus():
 tfback._get_available_gpus = _get_available_gpus
 
 gen_params = {
-    # 'dim': (96,1366),
-    'dim': (96, 469),
+    'dim': (96,1366),
+    # 'dim': (96, 469),
     'batch_size': 10,
     'n_classes': 4,
     'n_channels': 1,
@@ -42,8 +42,8 @@ gen_params = {
 
 root_folder = "/home/manojnb/deepMusic/"
 config = {
-    'audio_dir': root_folder + "fma_small/data",
-    'tracks': root_folder + 'fma_metadata/subset_small.csv',
+    'audio_dir': root_folder + "fma_medium",
+    'tracks': root_folder + 'fma_metadata/cleaned_medium.csv',
     'generator_params': gen_params,
     'audio_loader': utils.FfmpegLoader()
 
@@ -113,8 +113,8 @@ def compute_melgram(src, sr):
     N_FFT = 512
     N_MELS = 96
     HOP_LEN = 256
-    DURA = 10
-    # DURA = 29.12  # to make it 1366 frame..
+    # DURA = 10
+    DURA = 29.12  # to make it 1366 frame..
 
     # src, sr = librosa.load(audio_path, sr=SR)  # whole signal
     n_sample = src.shape[0]
@@ -232,7 +232,7 @@ test_generator = DataGenerator(test.index.values, labels_encoded, config['audio_
 start_time = time.time()
 train_batches = len(train.index.values) // config['generator_params']['batch_size']
 print(f'train_batches -> {train_batches}')
-for j in range(train_batches):
+for j in range(1):
     x, y = training_generator.__getitem__(j)
     x_train.append(x)
     y_train.append(y)
@@ -240,7 +240,7 @@ for j in range(train_batches):
 test_val_batches = len(test.index.values) // config['generator_params']['batch_size']
 print(f'test_val_batches -> {test_val_batches}')
 
-for i in range(test_val_batches):
+for i in range(1):
     x_v, y_v = validation_generator.__getitem__(i)
     x_val.append(x_v)
     y_val.append(y_v)
@@ -250,14 +250,14 @@ for i in range(test_val_batches):
     y_test.append(y_t)
 
 # print(f'x_train -> {np.asarray(x_train)}')
-np.save(root_folder + "npy_files/x_train.npy", x_train)
-np.save(root_folder + "npy_files/y_train.npy", y_train)
+np.save(root_folder + "npy_files/medium/x_train.npy", x_train)
+np.save(root_folder + "npy_files/medium/y_train.npy", y_train)
 
-np.save(root_folder + "npy_files/x_val.npy", x_val)
-np.save(root_folder + "npy_files/y_val.npy", y_val)
+np.save(root_folder + "npy_files/medium/x_val.npy", x_val)
+np.save(root_folder + "npy_files/medium/y_val.npy", y_val)
 
-np.save(root_folder + "npy_files/x_test.npy", x_test)
-np.save(root_folder + "npy_files/y_test.npy", y_test)
+np.save(root_folder + "npy_files/medium/x_test.npy", x_test)
+np.save(root_folder + "npy_files/medium/y_test.npy", y_test)
 
 # x_train = list(np.load(root_folder + "npy_files/x_train.npy"))
 print(f'x_train -> {len(x_train)}')

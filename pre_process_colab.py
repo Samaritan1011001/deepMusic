@@ -23,41 +23,13 @@ Original file is located at
 # start, end = 7, 17
 # ipd.Audio(data=x[start*sr:end*sr], rate=sr)
 
-import time
-#import utils   
-import os
+
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
-import IPython.display as ipd
-from tqdm import tqdm_notebook
-import numpy as np
-import pandas as pd
-import tensorflow.keras
-from tensorflow.keras import models
-# from tensorflow.keras.layers import Activation, Dense, Conv1D, Conv2D, MaxPooling1D, Flatten, Reshape
-from tensorflow.keras import layers
-from tensorflow.keras import optimizers
-
-from sklearn.utils import shuffle
-from sklearn.preprocessing import MultiLabelBinarizer, LabelEncoder, LabelBinarizer, StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import SVC, LinearSVC
-#from sklearn.gaussian_process import GaussianProcessClassifier
-#from sklearn.gaussian_process.kernels import RBF
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
-from sklearn.neural_network import MLPClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-from sklearn.multiclass import OneVsRestClassifier
-
 import sys
 sys.path.append('/content/drive/My Drive/cs577- Deep learning/deepMusic')
 import utils
 import librosa
-
-
 import os
 from tqdm import tqdm
 import pandas as pd
@@ -65,6 +37,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.io import wavfile
 from python_speech_features import mfcc, logfbank
+import librosa.display
 
 def plot_signals(signals):
     fig, axes = plt.subplots(nrows=2, ncols=4, sharex=False,
@@ -121,11 +94,21 @@ def plot_mfccs(mfccs):
             axes[x,y].get_xaxis().set_visible(False)
             axes[x,y].get_yaxis().set_visible(False)
             i += 1
+def plot_mel_spect(spect,key):
+    plt.figure(figsize=(10, 5))
+    librosa.display.specshow(spect.T, y_axis='mel', x_axis='time')
+    plt.colorbar(format='%+2.0f dB')
+    plt.title('Test Melspectogram')
+    key = key.replace(" / s","")
+    plt.savefig(root_folder + f'graphs/medium_set/mel_spect_{key}.png')
 
-# !pip install python_speech_features
 
-root_folder = "/content/drive/My Drive/cs577- Deep learning/deepMusic/"
-AUDIO_DIR = root_folder + 'fma_small'
+# root_folder = "D:\Code\Desktop\IIT\Courses\Spring 2020\Deep Learning\FInal Project\github_project\music_analysis_fp\\"
+# AUDIO_DIR = root_folder + 'fma_medium'
+
+root_folder = "/home/manojnb/deepMusic/"
+AUDIO_DIR = root_folder + "fma_medium"
+
 
 tracks = utils.load(root_folder + 'fma_metadata/tracks.csv')
 features = utils.load(root_folder + 'fma_metadata/features.csv')
@@ -136,7 +119,7 @@ assert echonest.index.isin(tracks.index).all()
 
 tracks.shape, features.shape, echonest.shape
 
-subset = tracks.index[tracks['set', 'subset'] == 'small']
+subset = tracks.index[tracks['set', 'subset'] == 'medium']
 
 assert subset.isin(tracks.index).all()
 assert subset.isin(features.index).all()
@@ -161,14 +144,14 @@ print('Top genres ({}): {}'.format(len(genres), genres))
 # print(train.loc[99135])
 # print(train.loc[99134])
 
-filename = utils.get_audio_path(AUDIO_DIR, 2)
-print('File: {}'.format(filename))
+# filename = utils.get_audio_path(AUDIO_DIR, 2)
+# print('File: {}'.format(filename))
+#
+# x, sr = librosa.load(filename, sr=None, mono=True)
+# print('Duration: {:.2f}s, {} samples'.format(x.shape[-1] / sr, x.size))
 
-x, sr = librosa.load(filename, sr=None, mono=True)
-print('Duration: {:.2f}s, {} samples'.format(x.shape[-1] / sr, x.size))
-
-start, end = 7, 17
-ipd.Audio(data=x[start*sr:end*sr], rate=sr)
+# start, end = 7, 17
+# ipd.Audio(data=x[start*sr:end*sr], rate=sr)
 
 all_tracks = tracks.copy()
 all_tracks.columns = ['_'.join(col).strip() for col in all_tracks.columns.values]
@@ -183,7 +166,8 @@ fig, ax = plt.subplots()
 ax.set_title('Class distribution', y=1.08)
 ax.pie(class_dist,labels=class_dist.index,autopct="%1.1f%%",shadow=False,startangle=90)
 ax.axis('equal')
-plt.show()
+plt.savefig(root_folder + "graphs/medium_set/class_dist.png")
+# plt.show()
 all_tracks.reset_index(inplace=True)
 
 def calc_fft(y, rate):
@@ -202,23 +186,68 @@ def envelope(y, rate, threshold):
         else:
             mask.append(False)
     return mask
+
+def compute_melgram(src, sr, c):
+    ''' Compute a mel-spectrogram and returns it in a shape of (1,1,96,1366), where
+    96 == #mel-bins and 1366 == #time frame
+
+    parameters
+    ----------
+    audio_path: path for the audio file.
+                Any format supported by audioread will work.
+    More info: http://librosa.github.io/librosa/generated/librosa.core.load.html#librosa.core.load
+
+    '''
+
+    # mel-spectrogram parameters
+    SR = 12000
+    N_FFT = 512
+    N_MELS = 96
+    HOP_LEN = 256
+    # DURA = 10
+    DURA = 29.12  # to make it 1366 frame..
+
+    # src, sr = librosa.load(audio_path, sr=SR)  # whole signal
+    n_sample = src.shape[0]
+    n_sample_fit = int(DURA*SR)
+    # print(f'n_sample_fit -> {n_sample_fit}')
+    # print(f'n_sample -> {n_sample}')
+    # print(src[int((n_sample-n_sample_fit)/2):int((n_sample+n_sample_fit)/2)])
+
+
+    if n_sample < n_sample_fit:  # if too short
+        src = np.hstack((src, np.zeros((int(DURA*SR) - n_sample,))))
+    elif n_sample > n_sample_fit:  # if too long
+        src = src[int((n_sample-n_sample_fit)/2):int((n_sample+n_sample_fit)/2)]
+    logam = librosa.amplitude_to_db
+    melgram = librosa.feature.melspectrogram
+    ret = logam(melgram(y=src, sr=SR, hop_length=HOP_LEN,
+                        n_fft=N_FFT, n_mels=N_MELS)**2,
+                ref=np.max)
+    plot_mel_spect(ret, c)
+    ret = ret[np.newaxis, np.newaxis, :]
+    return spects
+
 # Directory where mp3 are stored.
 # AUDIO_DIR = os.environ.get('AUDIO_DIR')
 print(AUDIO_DIR)
 
 signals = {}
+spects = {}
 fft = {}
 fbank = {}
 mfccs = {}
 
 for c in classes:
     mp3_file = all_tracks[all_tracks.track_genre_top == c].iloc[0,0]
-    signal, rate = utils.FfmpegLoader().load(utils.get_audio_path(AUDIO_DIR, mp3_file))
-#     mask = envelope(signal, rate,0.5)
-#     signal = signal[mask]
-    print(f'signal -> {signal.shape}')
-    print(f'rate -> {rate}')
-    print(f'signal rate -> {signal[:rate].shape}')
+    # signal, rate = utils.FfmpegLoader().load(utils.get_audio_path(AUDIO_DIR, mp3_file))
+    signal, rate = librosa.load(utils.get_audio_path(AUDIO_DIR, mp3_file))
+    s = signal.astype(float)
+    compute_melgram(s, rate, c)
+
+#     print(f'signal -> {signal.shape}')
+#     print(f'rate -> {rate}')
+#     print(f'signal rate -> {signal[:rate].shape}')
     signals[c] = signal
     fft[c] = calc_fft(signal,rate)
     
@@ -230,53 +259,20 @@ for c in classes:
 print(rate)
 
 plot_signals(signals)
-plt.show()
+plt.savefig(root_folder + "graphs/medium_set/signals.png")
+# plt.show()
 
 plot_fft(fft)
-plt.show()
+plt.savefig(root_folder + "graphs/medium_set/fft.png")
+# plt.show()
 
 plot_fbank(fbank)
-plt.show()
+plt.savefig(root_folder + "graphs/medium_set/fbank.png")
+# plt.show()
 
 plot_mfccs(mfccs)
-plt.show()
+plt.savefig(root_folder + "graphs/medium_set/mfcc.png")
+# plt.show()
 
-# CLEANING CORRUPTED FILES
-import utils
-import librosa
-import os
-import IPython.display as ipd
-AUDIO_DIR = '/content/drive/My Drive/cs577- Deep learning/deepMusic/fma_small'
-
-
-subset_small = tracks.index[tracks['set', 'subset'] == 'small']
-subset_small = tracks.loc[subset_small]
-
-subset_small.columns = ['_'.join(col).strip() for col in subset_small.columns.values]
-print(np.asarray(subset_small.index))
-classes = list(np.unique(subset_small['track_genre_top']))
-print(classes)
-class_dist = subset_small.groupby(['track_genre_top'])['track_duration'].mean().dropna()
-print(class_dist)
-tids = np.asarray(subset_small.index)
-
-# tids = [99134]
-# tids = np.asarray(tids)
-print(f'tids shape before -> {tids.shape}')
-error_tids = []
-for tid in tids:
-    filename = utils.get_audio_path(AUDIO_DIR, tid)
-    try:
-        x, sr = librosa.load(filename, sr=None, mono=True)
-        # print(f'Loaded file {tid}\n')
-    except Exception as e:
-        print(f'Error loading -> {tid}\n')
-        error_tids.append(tid)
-        tids = np.delete(tids, np.argwhere(tids==tid))
-        continue
-print(error_tids)
-subset_small.drop(error_tids,inplace = True)
-subset_small.to_csv('subset_small.csv')
-# !cp subset_small.csv "/content/drive/My Drive/cs577- Deep learning/deepMusic/fma_metadata/"
-# print(f'Deleted in metadata {subset_small.loc[99134]}')
-print(f'tids shape after -> {tids.shape}')
+for key, spect in spects.items():
+    plot_mel_spect(spect,key)
