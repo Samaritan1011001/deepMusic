@@ -1,16 +1,17 @@
 import time
+
+import keras
+import keras.backend.tensorflow_backend as tfback
+import librosa
+import librosa.display
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import keras
-
-from sklearn.preprocessing import LabelEncoder
-from src import utils
-import librosa
-import matplotlib.pyplot as plt
-import librosa.display
-from sklearn.utils.class_weight import compute_class_weight
 import tensorflow as tf
-import keras.backend.tensorflow_backend as tfback
+from sklearn.preprocessing import LabelEncoder
+from sklearn.utils.class_weight import compute_class_weight
+
+from src.helper import utils
 
 print("tf.__version__ is", tf.__version__)
 print("tf.keras.__version__ is:", tf.keras.__version__)
@@ -32,24 +33,26 @@ def _get_available_gpus():
 tfback._get_available_gpus = _get_available_gpus
 
 gen_params = {
-    'dim': (96,1366),
+    'dim': (96, 1366),
     # 'dim': (96, 469),
     'batch_size': 10,
     'n_classes': 4,
     'n_channels': 1,
-    'shuffle': True}
-
-root_folder = "/home/manojnb/deepMusic/"
-config = {
-    'audio_dir': root_folder + "fma_medium",
-    'tracks': root_folder + 'fma_metadata/cleaned_medium.csv',
-    'generator_params': gen_params,
-    'audio_loader': utils.FfmpegLoader()
-
+    'shuffle': True
 }
 
+root_folder = "D:\Code\Desktop\IIT\Courses\Spring 2020\Deep Learning\FInal Project\github_project\music_analysis_fp\\"
+subset_config = {
+    "audio_dir": "fma_small",
+    "subset": "small"
+}
+config = {
+    'audio_dir': root_folder + "data/" + subset_config['audio_dir'],
+    'tracks': root_folder + 'data/fma_metadata/cleaned_' + subset_config['subset'] + '.csv',
+    'generator_params': gen_params,
+    'audio_loader': utils.FfmpegLoader()
+}
 
-# config['generator_params']['dim']
 
 def plot_mel_spect(spect):
     plt.figure(figsize=(10, 5))
@@ -115,13 +118,8 @@ def compute_melgram(src, sr):
     # DURA = 10
     DURA = 29.12  # to make it 1366 frame..
 
-    # src, sr = librosa.load(audio_path, sr=SR)  # whole signal
     n_sample = src.shape[0]
     n_sample_fit = int(DURA * SR)
-    # print(f'n_sample_fit -> {n_sample_fit}')
-    # print(f'n_sample -> {n_sample}')
-    # print(src[int((n_sample-n_sample_fit)/2):int((n_sample+n_sample_fit)/2)])
-
     if n_sample < n_sample_fit:  # if too short
         src = np.hstack((src, np.zeros((int(DURA * SR) - n_sample,))))
     elif n_sample > n_sample_fit:  # if too long
@@ -185,29 +183,11 @@ class DataGenerator(keras.utils.Sequence):
 
         # Generate data
         for i, ID in enumerate(list_IDs_temp):
-            # # Store sample
-            # signal, rate = self.loader.load(utils.get_audio_path(self.audio_dir, ID))
-            # sample = signal[:rate]
-
-            # # Shorten the sample to 10 secs
-            # ran_index = np.random.randint(0, signal.shape[0] - int(rate / 10))
-            # sample = signal[ran_index:ran_index + int(rate / 10)]
-            # # print(f'shape of sample -> {sample.shape}')
-            # normalized_X = preprocessing.normalize(mfcc(sample, rate, numcep=13, nfilt=26, nfft=1103).T)
-            # temp = np.array(normalized_X)
-            # rshaped_X = temp.reshape(temp.shape[0], temp.shape[1], 1)
-            # X[i,] = rshaped_X
-
             # Librosa version mel spectrogram
             signal, sr = librosa.load(utils.get_audio_path(self.audio_dir, ID))
             signal = signal.astype(float)
             spect = compute_melgram(signal, sr)
             X[i,] = spect
-
-            # temp = np.array(spect)
-            # rshaped_X = temp.reshape(temp.shape[0], temp.shape[1], 1)
-            # X[i,] = rshaped_X
-            # X[i,] = np.array(spect)
 
             # Store class
             y[i] = self.labels.loc[ID].to_numpy()
@@ -248,15 +228,17 @@ for i in range(test_val_batches):
     x_test.append(x_t)
     y_test.append(y_t)
 
-# print(f'x_train -> {np.asarray(x_train)}')
-np.save(root_folder + "npy_files/medium/x_train.npy", x_train)
-np.save(root_folder + "npy_files/medium/y_train.npy", y_train)
-
-np.save(root_folder + "npy_files/medium/x_val.npy", x_val)
-np.save(root_folder + "npy_files/medium/y_val.npy", y_val)
-
-np.save(root_folder + "npy_files/medium/x_test.npy", x_test)
-np.save(root_folder + "npy_files/medium/y_test.npy", y_test)
+'''
+UNCOMMENT TO SAVE
+'''
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/x_train.npy", x_train)
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/y_train.npy", y_train)
+#
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/x_val.npy", x_val)
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/y_val.npy", y_val)
+#
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/x_test.npy", x_test)
+# np.save(root_folder + "data/npy_files/" + subset_config['subset'] + "/y_test.npy", y_test)
 
 # x_train = list(np.load(root_folder + "npy_files/x_train.npy"))
 print(f'x_train -> {len(x_train)}')
