@@ -1,0 +1,16 @@
+Confusion Matrix
+[[354   0   0 176]
+ [  4   0   0  48]
+ [ 93   0   0  26]
+ [ 52   0   0 557]]
+Classification Report
+              precision    recall  f1-score   support
+
+  Electronic       0.70      0.67      0.69       530
+        Folk       0.00      0.00      0.00        52
+        Rock       0.00      0.00      0.00       119
+     Hip-Hop       0.69      0.91      0.79       609
+
+    accuracy                           0.70      1310
+   macro avg       0.35      0.40      0.37      1310
+weighted avg       0.61      0.70      0.64      1310
