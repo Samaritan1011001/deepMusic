@@ -1,7 +1,7 @@
-#Music Analysis (Genre Classification) using Deep Learning
+Music Analysis (Genre Classification) using Deep Learning
 ----------------------------------------------------------------------------------------------------------------------------
 
-## Project Structure
+### Project Structure
 
 1. music_analysis_fp <br />
     1.1 data <br />
@@ -20,5 +20,5 @@
         1.6.4 `cnn_model_using_npy_medium_set.ipynb` is the core file that loads the npy files and trains the network <br />
         1.6.5 `visualize.ipynb` is used in producing visuals for the network <br />
         
-## Note
+### Note
 1. The config variales at the beginning of the files must be changed to use either small or medium datasets for training, plotting etc
