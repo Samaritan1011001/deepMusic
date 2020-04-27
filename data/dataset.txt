@@ -1,0 +1,5 @@
+FMA Data: https://github.com/mdeff/fma  
+The above drive consists fma_small.zip, fma_medium.zip & fma_metadata.zip which are required for our project.
+
+Processed .npy file: https://drive.google.com/open?id=1-2Mxhnd1pOaRNcs2PCcMu7fSFcFboGTF
+This file is used for training and testing our model.
