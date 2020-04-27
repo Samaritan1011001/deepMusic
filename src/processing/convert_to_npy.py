@@ -11,7 +11,7 @@ import tensorflow as tf
 from sklearn.preprocessing import LabelEncoder
 from sklearn.utils.class_weight import compute_class_weight
 
-from src.helper import utils
+from sources import utils
 
 print("tf.__version__ is", tf.__version__)
 print("tf.keras.__version__ is:", tf.keras.__version__)

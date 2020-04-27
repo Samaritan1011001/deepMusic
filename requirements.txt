@@ -5,7 +5,7 @@ seaborn
 
 scikit-learn
 tensorflow
-keras<2
+keras
 
 librosa
 
@@ -16,3 +16,4 @@ tqdm
 jupyter
 
 python-dotenv
+python_speech_features

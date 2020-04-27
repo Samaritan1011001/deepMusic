@@ -5,7 +5,7 @@ import time
 import librosa
 import numpy as np
 
-from src.helper import utils
+from sources import utils
 
 root_folder = "D:\Code\Desktop\IIT\Courses\Spring 2020\Deep Learning\FInal Project\github_project\music_analysis_fp\\"
 # root_folder = "/home/manojnb/deepMusic/"

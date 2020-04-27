@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
 from sklearn.preprocessing import LabelEncoder
-from src.helper import utils
+from sources import utils
 from sklearn import preprocessing
 
 

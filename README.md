@@ -3,7 +3,7 @@ Music Analysis (Genre Classification) using Deep Learning
 
 ### Project Structure
 
-1. music_analysis_fp <br />
+1. project <br />
     1.1 data <br />
         1.1.1 fma_metadata - consists of the metadata needed to load audio files (tids) <br />
         1.1.2 fma_small - the small dataset downloaded from the repository given in data.txt <br />
@@ -14,7 +14,7 @@ Music Analysis (Genre Classification) using Deep Learning
     1.4 presentation - contains the project presentation <br />
     1.5 sources - various research paper and other sources used in the project <br />
     1.6 src <br />
-        1.6.1 helper - contains some helper files, the main one is utils.py <br />
+        1.6.1 helper - contains some helper files <br />
         1.6.2 processing - contains .py programs to help with pre-processing, cleaning metadata, conversion to npy <br />
         1.6.3 trials - contains experimental configs of the network <br />
         1.6.4 `cnn_model_using_npy_medium_set.ipynb` is the core file that loads the npy files and trains the network <br />
